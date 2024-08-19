@@ -2,13 +2,19 @@
 use std::env;
 use rand::Rng;
 fn main() {
+    
     let args: Vec<String> = env::args().collect();
-    let roll = "roll".to_string();   
-    for i in 0..args.len(){
-        if args[i] == roll {
-            parsing(tokenize(&args[i+1]))
+    let mut string: String = "".to_string();
+    for i in 0 .. args.len() {
+        if !is_at_end(i, args.len()){
+            string.push_str(&args[i+1]);
+            string.push_str(" ");
         }
+        
     }
+    println!("{}", string);   
+    parsing(tokenize(&string));
+   
     
    
 }
@@ -63,14 +69,29 @@ impl Token {
     }
     
 }
-
+fn is_at_end(current: usize, len: usize) -> bool {
+    len - current == 1
+}
 
 fn tokenize(source: &String) -> Vec<Token> {
     //I need a match statement to tie TokenKind to its prospective String value
+    let mut token = Token::new();
+    let mut tokens: Vec<Token> = Vec::new(); 
+    let two_strings: Vec<&str> = source.split(' ').collect();
+
     let char_source: Vec<char> = source.chars().collect();
-    let mut tokens: Vec<Token> = Vec::new();
+    for s in two_strings{
+        match s {
+            "roll" => {token = Token { kind: TokenKind::ROLL, lexeme: "roll".to_string() }},
+            _ => continue,
+        }
+        if s != ""{
+            tokens.push(token);
+        }
+        
+    }
     let mut numstring = "".to_string();
-    let mut token = Token::new(); 
+    
     for i in 0 .. char_source.len(){ 
               
         if char_source[i].is_numeric() {            
@@ -80,12 +101,15 @@ fn tokenize(source: &String) -> Vec<Token> {
             numstring = "".to_string();
         }
 
-        if numstring != "".to_string(){
-            token = Token { kind: TokenKind::NUMBER, lexeme: numstring.clone() };
-            tokens.push(token);
+        if numstring != "".to_string() && !is_at_end(i, char_source.len()){
+            if !char_source[i+1].is_numeric() {
+                token = Token { kind: TokenKind::NUMBER, lexeme: numstring.clone() };
+                tokens.push(token);
+            }
+            
         }
 
-        if i < char_source.len(){
+        if !is_at_end(i, char_source.len()){
             match char_source[i] {
                 '+' => {token = Token { kind: TokenKind::PLUS, lexeme: "+".to_string() };},
                 '-' => {token = Token { kind: TokenKind::MINUS, lexeme: "-".to_string() };},
