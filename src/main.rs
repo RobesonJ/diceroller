@@ -14,9 +14,10 @@ fn main() {
 }
 fn parsing(tokens: Vec<Token>){
     for token in tokens{
-        println!("Token: {}", token.lexeme)
+        println!("Token: {:?} {}",token.kind, token.lexeme)
     }
 }
+#[derive(Debug)]
 enum TokenKind {
     // Single-character tokens.
     LEFT_PAREN, 
@@ -62,13 +63,7 @@ impl Token {
     }
     
 }
-struct Lexer {
-    source: Vec<String>,
-    tokens: Vec<Token>,
-}
-fn is_at_end(current: usize, source: String)-> bool{
-    current >= source.len()
-}
+
 
 fn tokenize(source: &String) -> Vec<Token> {
     //I need a match statement to tie TokenKind to its prospective String value
@@ -76,22 +71,27 @@ fn tokenize(source: &String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut numstring = "".to_string();
     let mut token = Token::new(); 
-    for mut i in 0 .. char_source.len(){        
-        while i < char_source.len() && char_source[i].is_numeric() {            
+    for i in 0 .. char_source.len(){ 
+              
+        if char_source[i].is_numeric() {            
                 numstring.push_str(&char_source[i].to_string());                
-                i += 1;
+               
+        } else {
+            numstring = "".to_string();
         }
+
         if numstring != "".to_string(){
             token = Token { kind: TokenKind::NUMBER, lexeme: numstring.clone() };
             tokens.push(token);
-        }        
-        numstring = "".to_string();        
+        }
+
         if i < char_source.len(){
             match char_source[i] {
                 '+' => {token = Token { kind: TokenKind::PLUS, lexeme: "+".to_string() };},
                 '-' => {token = Token { kind: TokenKind::MINUS, lexeme: "-".to_string() };},
                 'd' => {                    
                     token = Token { kind: TokenKind::DIE, lexeme: "d".to_string() };
+                    
                 } ,                          
                 _ => continue,
             }        
@@ -118,7 +118,7 @@ impl Die {
             match self.sign {
                 '+' => {total = 1 * result + self.modifier;},
                 '-' => {total = 1 * result - self.modifier;},
-                _ => printerr("invalid sign"),
+                _ => continue, //printerr("invalid sign"),
             }
             println!("{}", total);
         }
@@ -155,6 +155,3 @@ fn make_die(arg: &str){
 }
 
  
-fn printerr(e: &str){
-    println!("{}", e);
-}
